@@ -106,7 +106,7 @@ export function uploadProductPicture(req, res) {
             });
         }
 
-        product.image = req.file.filename;
+        product.image = process.env.UPLOAD_BASE_URL + req.file.filename;
 
         res.json({
             success: true,
