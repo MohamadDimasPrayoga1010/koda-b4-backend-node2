@@ -38,7 +38,7 @@ export function addProduct(name, price){
 export function updateProduct(id, name, price){
     const product = getProductById(id);
     if(product){
-        product.name = name ?? product.name
+        product.name == name ?? product.name
         product.price == price ?? product.price
         return product
     }
