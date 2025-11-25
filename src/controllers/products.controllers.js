@@ -1,14 +1,55 @@
 import { getProducts, getProductById, addProduct, updateProduct, deleteProduct } from "../models/products.models.js";
 
+/**
+ * GET /api/products
+ * @summary Get all products with search, pagination, limit, sort
+ * @tags Products
+ * @param {string} search.query - keyword untuk search nama produk
+ * @param {number} page.query - nomor halaman (default 1)
+ * @param {number} limit.query - jumlah item per halaman (default 10)
+ * @param {string} sort.query - 'termurah' untuk harga termurah, 'termahal' untuk harga termahal
+ * @return {object} 200 - Success response
+ */
 export function products(req, res) {
-    const allProducts = getProducts(); 
+    let result = getProducts();
+
+    const { search, page = 1, limit = 10, sort } = req.query;
+
+    if (search) {
+        result = result.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    }
+
+    if (sort === "termurah") {
+        result = result.sort((a, b) => a.price - b.price);
+    } else if (sort === "termahal") {
+        result = result.sort((a, b) => b.price - a.price);
+    }
+
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+    const start = (pageInt - 1) * limitInt;
+    const end = start + limitInt;
+
+    const paginated = result.slice(start, end);
+
     res.json({
         success: true,
         message: "Berhasil get product",
-        data: allProducts
+        total: result.length,
+        page: pageInt,
+        limit: limitInt,
+        data: paginated
     });
 }
 
+/**
+ * GET /api/products/{id}
+ * @summary Get product by ID
+ * @tags Products
+ * @param {number} id.path.required - Product ID
+ * @return {object} 200 - Success response
+ * @return {object} 404 - Product not found
+ */
 export function productById(req, res) {
     const id = parseInt(req.params.id); 
     const product = getProductById(id);
@@ -27,17 +68,39 @@ export function productById(req, res) {
     }
 }
 
+/**
+ * POST /api/products
+ * @summary Create new product
+ * @tags Products
+ * @param {object} request.body.required - Product body
+ * @param  {string} name.form.required - name product - application/x-www-form-urlencoded
+ * @param  {number} price.form.required - price - application/x-www-form-urlencoded
+ * @return {object} 200 - Success response
+ */
 export function createProduct(req, res){
     const {name, price} = req.body;
     const newProduct = addProduct(name, price)
 
     res.json({
         success:true,
-        message: "Berhasil update product",
+        message: "Berhasil membuat product baru",
         data: newProduct
     })
 }
 
+
+/**
+ * PATCH /api/products/{id}
+ * @summary Update product by ID
+ * @tags Products
+ * @consumes application/x-www-form-urlencoded
+ * @param {number} id.path.required - Product ID
+ * @param {object} request.body.required - Product body
+ * @param  {string} name.form.required - name product - application/x-www-form-urlencoded
+ * @param  {number} price.form.required - price - application/x-www-form-urlencoded
+ * @return {object} 200 - Success response
+ * @return {object} 404 - Product not found
+ */
 export function editProduct(req, res) {
     const id = parseInt(req.params.id);
     const { name, price } = req.body;
@@ -55,7 +118,14 @@ export function editProduct(req, res) {
     }
 }
 
-
+/**
+ * DELETE /api/products/{id}
+ * @summary Delete product by ID
+ * @tags Products
+ * @param {number} id.path.required - Product ID
+ * @return {object} 200 - Success response
+ * @return {object} 404 - Product not found
+ */
 export function removeProduct(req, res) {
     const id = parseInt(req.params.id);
     const deleted = deleteProduct(id);
