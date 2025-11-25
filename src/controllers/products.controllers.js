@@ -1,3 +1,4 @@
+import { upload } from "../libs/uploads.js";
 import { getProducts, getProductById, addProduct, updateProduct, deleteProduct } from "../models/products.models.js";
 
 /**
@@ -67,6 +68,55 @@ export function productById(req, res) {
         });
     }
 }
+
+
+/**
+ * POST /api/products/{id}/upload
+ * @summary Upload gambar product
+ * @tags Products
+ * @param {number} id.path.required - ID product
+ * @param {file} picture.form.required - File gambar product - multipart/form-data
+ * @return {object} 200 - Upload berhasil
+ * @return {object} 400 - File invalid atau terlalu besar
+ * @return {object} 404 - Product tidak ditemukan
+ */
+export function uploadProductPicture(req, res) {
+    const id = parseInt(req.params.id);
+    const product = getProductById(id);
+
+    if (!product) {
+        return res.status(404).json({
+            success: false,
+            message: "Product tidak ditemukan"
+        });
+    }
+
+    upload.single("picture")(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "File to large"
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "File tidak ditemukan" 
+            });
+        }
+
+        product.image = req.file.filename;
+
+        res.json({
+            success: true,
+            message: "Upload berhasil",
+            file: req.file.filename,
+            product
+        });
+    });
+}
+
 
 /**
  * POST /api/products
@@ -141,3 +191,4 @@ export function removeProduct(req, res) {
             message: "Product tidak ditemukan" });
     }
 }
+
