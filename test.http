@@ -1,0 +1,51 @@
+POST /auth/register
+Host: localhost:8080
+Content-Type: application/json
+
+{
+    "fullname":"Yoga", 
+    "email":"yoga4@mail.com",
+    "password":"123"
+}
+
+### LOGIN
+POST /auth/login
+Host: localhost:8080
+Content-Type: application/json
+
+{
+    "email":"yoga4@mail.com",
+    "password":"123"
+}
+
+### GET PRODUCTS
+GET /api/products
+Host: localhost:8080
+Content-Type: application/json
+
+
+### CREATE PRODUCTS
+POST /api/product/
+Host: localhost:8080
+Content-Type: application/json
+
+{
+    "name": "Test",
+    "price": 1000
+}
+
+###
+PATCH /api/products/4
+Host: localhost:8080
+Content-Type: application/json
+
+{
+    "name": "Test3",
+    "price": 10000
+}
+
+
+### delete product
+DELETE  /api/products/1
+Host: localhost:8080
+Content-Type: application/json
