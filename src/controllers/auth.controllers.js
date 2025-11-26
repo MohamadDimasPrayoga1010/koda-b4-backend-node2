@@ -1,4 +1,5 @@
-import { craeteUser, findUserByEmail } from "../models/user.models.js";
+import { error } from "console";
+import { createUser, findUserByEmail } from "../models/user.models.js";
 
 /**
  * POST /auth/register
@@ -11,17 +12,32 @@ import { craeteUser, findUserByEmail } from "../models/user.models.js";
  * @return {object} 200 - Sukses response
  * @return {object} 401 - email or password correct
  */
-export function register(req, res){
-    const {fullname, email, password} = req.body
-    const newUser = craeteUser(fullname, email, password)
+export async function register(req, res) {
+  const { fullname, email, password } = req.body;
+
+  try {
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email sudah terdaftar",
+      });
+    }
+    const newUser = await createUser(fullname, email, password);
 
     res.json({
-        success: true,
-        message: "Berhasil melakukan registrasi",
-        data: newUser
+      success: true,
+      message: "Berhasil melakukan registrasi",
+      data: newUser,
+    });
+  } catch (err){
+    res.status(500).json({
+      success: false,
+      message: "Terjadi Kesalahan server",
+      error: err.message
     })
+  }
 }
-
 
 /**
  * POST /auth/login
@@ -33,22 +49,29 @@ export function register(req, res){
  * @return {object} 200 - Sukses response
  * @return {object} 401 - email or password correct
  */
-export function login(req, res) {
+export async function login(req, res) {
   const { email, password } = req.body;
-  const user = findUserByEmail(email);
+  
+  try{
+     const user = findUserByEmail(email);
 
-  if (user && user.password === password) {
+     if (!user || user.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: "Email atau password salah",
+      });
+    }
+
     res.json({
       success: true,
       message: "Login berhasil",
       data: user,
     });
-  } else {
-    res.status(401).json({
+  }catch (err){
+    res.status(500).json({
       success: false,
-      message: "Email atau password salah",
-    });
+      message: "Terjadi kesalahan server",
+      error: err.message,
+    })
   }
 }
-
-
