@@ -1,13 +1,13 @@
-const users = [];
+import prisma from "../libs/prisma.js";
 
-export function craeteUser(fullname, email, password){
-  const user = {fullname, email, password}
-  users.push(user)
-  return user;
+export async function createUser(fullname, email, password) {
+  return await prisma.user.create({
+    data: { fullname, email, password },
+  });
 }
 
-export function findUserByEmail(email){
-  return users.find(user => user.email === email)
+export async function findUserByEmail(email) {
+  return await prisma.user.findUnique({
+    where: { email },
+  });
 }
-
-
