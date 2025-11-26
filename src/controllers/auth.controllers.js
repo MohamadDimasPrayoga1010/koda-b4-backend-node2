@@ -1,5 +1,6 @@
 import { error } from "console";
 import { createUser, findUserByEmail } from "../models/user.models.js";
+import jwt from "jsonwebtoken";
 
 /**
  * POST /auth/register
@@ -62,10 +63,14 @@ export async function login(req, res) {
       });
     }
 
+    const token = jwt.sign({id: user.id}, process.env.APP_SECRET,{
+      expiresIn: 15 * 60 * 1000,
+    })
     res.json({
       success: true,
       message: "Login berhasil",
       data: user,
+      token
     });
   }catch (err){
     res.status(500).json({
@@ -75,3 +80,5 @@ export async function login(req, res) {
     })
   }
 }
+
+
