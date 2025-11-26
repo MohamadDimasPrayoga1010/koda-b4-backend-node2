@@ -53,7 +53,7 @@ export async function login(req, res) {
   const { email, password } = req.body;
   
   try{
-     const user = findUserByEmail(email);
+     const user = await findUserByEmail(email);
 
      if (!user || user.password !== password) {
       return res.status(401).json({
